@@ -222,6 +222,9 @@ class BeamSearchScorer(BeamScorer):
         eos_token_id: Optional[Union[int, List[int]]] = None,
         beam_indices: Optional[torch.LongTensor] = None,
         group_index: Optional[int] = 0,
+        beam_scores: Optional[torch.FloatTensor] = None,
+        next_true_log_probs: Optional[torch.FloatTensor] = None,
+
     ) -> Dict[str, torch.Tensor]:
         cur_len = input_ids.shape[-1] + 1  # add up to the length which the next_scores is calculated on
         batch_size = len(self._beam_hyps) // self.num_beam_groups
@@ -265,6 +268,8 @@ class BeamSearchScorer(BeamScorer):
                 zip(next_tokens[batch_idx], next_scores[batch_idx], next_indices[batch_idx])
             ):
                 batch_beam_idx = batch_idx * self.group_size + next_index
+                if beam_scores is not None and next_true_log_probs is not None:
+                    next_score = beam_scores[batch_beam_idx] + next_true_log_probs[batch_idx, beam_token_rank]
                 # add to generated hypotheses if end of sentence
                 if (eos_token_id is not None) and (next_token.item() in eos_token_id):
                     # if beam_token does not belong to top num_beams tokens, it should not be added

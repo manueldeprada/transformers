@@ -1634,6 +1634,7 @@ class GenerationMixin:
                 eos_token_id=generation_config.eos_token_id,
                 output_scores=generation_config.output_scores,
                 return_dict_in_generate=generation_config.return_dict_in_generate,
+                use_beam_scores=generation_config.use_beam_scores,
                 synced_gpus=synced_gpus,
                 **model_kwargs,
             )
@@ -2807,6 +2808,7 @@ class GenerationMixin:
         beam_scorer: BeamScorer,
         logits_processor: Optional[LogitsProcessorList] = None,
         stopping_criteria: Optional[StoppingCriteriaList] = None,
+        use_beam_scores: Optional[bool] = True,
         max_length: Optional[int] = None,
         pad_token_id: Optional[int] = None,
         eos_token_id: Optional[Union[int, List[int]]] = None,
@@ -3017,9 +3019,17 @@ class GenerationMixin:
                 next_token_logits, dim=-1
             )  # (batch_size * num_beams, vocab_size)
 
-            next_token_scores_processed = logits_processor(input_ids, next_token_scores)
-            next_token_scores = next_token_scores_processed + beam_scores[:, None].expand_as(next_token_scores)
-
+            model_log_probs = next_token_scores.clone()
+            next_token_scores_processed = logits_processor(input_ids, 
+                                                           next_token_scores,
+                                                           beam_log_probs=beam_scores, 
+                                                           past_scores=scores,
+                                                           beam_indices=beam_indices,)
+            if use_beam_scores: #from config
+                next_token_scores = next_token_scores_processed + beam_scores[:, None].expand_as(next_token_scores)
+            else:
+                next_token_scores = next_token_scores_processed
+                
             # Store scores, attentions and hidden_states when required
             if return_dict_in_generate:
                 if output_scores:
@@ -3047,6 +3057,7 @@ class GenerationMixin:
                 next_token_scores, 2 * num_beams, dim=1, largest=True, sorted=True
             )
 
+            model_log_probs = model_log_probs.view((batch_size, num_beams * vocab_size)).gather(dim=1, index=next_tokens)
             next_indices = torch.div(next_tokens, vocab_size, rounding_mode="floor")
             next_tokens = next_tokens % vocab_size
 
@@ -3059,6 +3070,8 @@ class GenerationMixin:
                 pad_token_id=pad_token_id,
                 eos_token_id=eos_token_id,
                 beam_indices=beam_indices,
+                beam_scores=beam_scores,
+                next_true_log_probs=model_log_probs,
             )
 
             beam_scores = beam_outputs["next_beam_scores"]

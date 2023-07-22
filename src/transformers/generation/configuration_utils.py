@@ -290,6 +290,7 @@ class GenerationConfig(PushToHubMixin):
         # Generation parameters exclusive to encoder-decoder models
         self.encoder_no_repeat_ngram_size = kwargs.pop("encoder_no_repeat_ngram_size", 0)
         self.decoder_start_token_id = kwargs.pop("decoder_start_token_id", None)
+        self.use_beam_scores = kwargs.pop("use_beam_scores", True)
 
         # Wild card
         self.generation_kwargs = kwargs.pop("generation_kwargs", {})
