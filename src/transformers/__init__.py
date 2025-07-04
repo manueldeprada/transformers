@@ -353,7 +353,6 @@ else:
     _import_structure["activations"] = []
     _import_structure["cache_utils"] = [
         "Cache",
-        "CacheConfig",
         "DynamicCache",
         "EncoderDecoderCache",
         "HQQQuantizedCache",
@@ -361,7 +360,6 @@ else:
         "OffloadedCache",
         "OffloadedStaticCache",
         "QuantizedCache",
-        "QuantizedCacheConfig",
         "QuantoQuantizedCache",
         "SinkCache",
         "SlidingWindowCache",
@@ -833,7 +831,6 @@ if TYPE_CHECKING:
         # Debugging
         from .cache_utils import (
             Cache,
-            CacheConfig,
             DynamicCache,
             EncoderDecoderCache,
             HQQQuantizedCache,
@@ -841,7 +838,6 @@ if TYPE_CHECKING:
             OffloadedCache,
             OffloadedStaticCache,
             QuantizedCache,
-            QuantizedCacheConfig,
             QuantoQuantizedCache,
             SinkCache,
             SlidingWindowCache,

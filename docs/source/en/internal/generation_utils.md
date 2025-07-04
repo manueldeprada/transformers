@@ -359,12 +359,6 @@ A [`Constraint`] can be used to force the generation to include specific tokens 
 [[autodoc]] Cache
     - update
 
-[[autodoc]] CacheConfig
-	- update
-
-[[autodoc]] QuantizedCacheConfig
-	- validate
-
 [[autodoc]] DynamicCache
 
 [[autodoc]] QuantizedCache

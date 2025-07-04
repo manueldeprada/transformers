@@ -35,7 +35,6 @@ from ..cache_utils import (
     HybridChunkedCache,
     OffloadedCache,
     OffloadedHybridCache,
-    QuantizedCacheConfig,
 )
 from ..configuration_utils import PretrainedConfig
 from ..dynamic_module_utils import (
@@ -2077,7 +2076,7 @@ class GenerationMixin(ContinuousMixin):
                 cache_config = (
                     generation_config.cache_config
                     if generation_config.cache_config is not None
-                    else QuantizedCacheConfig()
+                    else {}
                 )
                 cache_class = QUANT_BACKEND_CLASSES_MAPPING[cache_config.backend]
 
