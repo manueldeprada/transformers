@@ -23,6 +23,7 @@ from dataclasses import dataclass, is_dataclass
 from typing import TYPE_CHECKING, Any, Callable, Optional, Union
 
 from .. import __version__
+from ..cache_utils import CacheConfig
 from ..configuration_utils import PretrainedConfig
 from ..utils import (
     GENERATION_CONFIG_NAME,
@@ -397,6 +398,16 @@ class GenerationConfig(PushToHubMixin):
         self.use_cache = kwargs.pop("use_cache", True)
         self.cache_implementation = kwargs.pop("cache_implementation", None)
         self.cache_config = kwargs.pop("cache_config", None)
+        if self.cache_config is not None and isinstance(self.cache_config, CacheConfig):
+            warnings.warn(
+                (
+                    "Passing a CacheConfig object is deprecated and will be removed in v4.55.0 in favor of a simpler dictionary."
+                ),
+                FutureWarning,
+                stacklevel=2,
+            )
+            self.cache_config = CacheConfig.to_dict(self.cache_config)
+
         self.return_legacy_cache = kwargs.pop("return_legacy_cache", None)
         self.prefill_chunk_size = kwargs.pop("prefill_chunk_size", None)
 
